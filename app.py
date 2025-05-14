@@ -20,7 +20,6 @@ dpdpa_checklists = {
             "Lawful purpose must be backed by explicit consent from the Data Principal or fall under legitimate uses."
         ]
     },
-    # Add similar checklist dicts for sections 5–8
     "5": {
         "title": "Notice",
         "items": [
@@ -48,20 +47,6 @@ dpdpa_checklists = {
             "If consent is withdrawn, data processing stops and data is erased unless legally required."
         ]
     },
-     "8": {
-        "title": "General Obligations of Data Fiduciary",
-        "items": [
-            "Implements appropriate technical and organizational measures to ensure compliance with DPDPA.",
-            "Maintains data accuracy and completeness to ensure it is up-to-date.",
-            "Implements reasonable security safeguards to prevent personal data breaches.",
-            "Notifies the Data Protection Board and affected Data Principals in the event of a breach.",
-            "Erases personal data as soon as the purpose is fulfilled and retention is no longer necessary.",
-            "Maintains records of processing activities in accordance with prescribed rules.",
-            "Conducts periodic Data Protection Impact Assessments if required.",
-            "Appoints a Data Protection Officer (DPO) if classified as a Significant Data Fiduciary.",
-            "Publishes the business contact information of the DPO or person handling grievances."
-        ]
-    },
     "7": {
         "title": "Certain Legitimate Uses",
         "items": [
@@ -74,7 +59,23 @@ dpdpa_checklists = {
             "Processing is for purposes of corporate governance, mergers, or disclosures under legal obligations.",
             "Processing is necessary for any fair and reasonable purpose specified by the Data Protection Board."
         ]
+    },
+    "8": {
+        "title": "General Obligations of Data Fiduciary",
+        "items": [
+            "Implements appropriate technical and organizational measures to ensure compliance with DPDPA.",
+            "Maintains data accuracy and completeness to ensure it is up-to-date.",
+            "Implements reasonable security safeguards to prevent personal data breaches.",
+            "Notifies the Data Protection Board and affected Data Principals in the event of a breach.",
+            "Erases personal data as soon as the purpose is fulfilled and retention is no longer necessary.",
+            "Maintains records of processing activities in accordance with prescribed rules.",
+            "Conducts periodic Data Protection Impact Assessments if required.",
+            "Appoints a Data Protection Officer (DPO) if classified as a Significant Data Fiduciary.",
+            "Publishes the business contact information of the DPO or person handling grievances."
+        ]
     }
+    },
+    # Add similar checklist dicts for sections 5–8
 }
 
 # --- Block Splitter ---
@@ -105,26 +106,26 @@ def extract_text_from_pdf(pdf_file):
 def create_block_prompt(section_id, block_text, checklist):
     checklist_text = "\n".join(f"- {item}" for item in checklist)
     return f"""
-You are a compliance analyst evaluating whether the following privacy policy block meets DPDPA Section {section_id}: {dpdpa_checklists[section_id]['title']}.
-
-**Checklist:**
-{checklist_text}
-
-**Policy Block:**
-{block_text}
-
-Evaluate each checklist item as: Explicitly Mentioned / Partially Mentioned / Missing.
-Return output in this format:
-{{
-  "Match Level": "...",
-  "Compliance Score": 0.0,
-  "Checklist Evaluation": [
-    {{"Checklist Item": "...", "Status": "...", "Justification": "..."}}
-  ],
-  "Suggested Rewrite": "...",
-  "Simplified Legal Meaning": "..."
-}}
-"""
+    You are a compliance analyst evaluating whether the following privacy policy block meets DPDPA Section {section_id}: {dpdpa_checklists[section_id]['title']}.
+    
+    **Checklist:**
+    {checklist_text}
+    
+    **Policy Block:**
+    {block_text}
+    
+    Evaluate each checklist item as: Explicitly Mentioned / Partially Mentioned / Missing.
+    Return output in this format:
+    {{
+      "Match Level": "...",
+      "Compliance Score": 0.0,
+      "Checklist Evaluation": [
+        {{"Checklist Item": "...", "Status": "...", "Justification": "..."}}
+      ],
+      "Suggested Rewrite": "...",
+      "Simplified Legal Meaning": "..."
+    }}
+    """
 
 # --- GPT Call ---
 def call_gpt(prompt):
@@ -163,13 +164,37 @@ def analyze_policy_section(section_id, checklist, policy_text):
             continue
 
     matched_items = {}
+
+    if section_id == "8":
+        canonical_display_map = {
+            "implements appropriate technical and organizational measures": "Implements appropriate technical and organizational measures to ensure compliance with DPDPA.",
+            "maintains data accuracy and completeness": "Maintains data accuracy and completeness to ensure it is up-to-date.",
+            "implements reasonable security safeguards": "Implements reasonable security safeguards to prevent personal data breaches.",
+            "notifies the data protection board and affected data principals in case of breach": "Notifies the Data Protection Board and affected Data Principals in the event of a breach.",
+            "erases personal data when purpose is fulfilled": "Erases personal data as soon as the purpose is fulfilled and retention is no longer necessary.",
+            "maintains records of processing activities": "Maintains records of processing activities in accordance with prescribed rules.",
+            "conducts data protection impact assessments": "Conducts periodic Data Protection Impact Assessments if required.",
+            "appoints a data protection officer": "Appoints a Data Protection Officer (DPO) if classified as a Significant Data Fiduciary.",
+            "publishes dpo contact information": "Publishes the business contact information of the DPO or person handling grievances."
+        }
+    else:
+        canonical_display_map = {}
+
     for res in all_results:
         for item in res.get("Checklist Evaluation", []):
-            key = item["Checklist Item"].strip().lower().rstrip('.')
+            key = item["Checklist Item"].strip().lower().replace(".", "")
+
+            if section_id == "8":
+                for match in canonical_display_map.keys():
+                    if match in key:
+                        key = match
+                        break
+
             if "all other checklist items" in key:
-                continue  # skip irrelevant item
+                continue
 
             if key not in matched_items:
+                item["Checklist Item"] = canonical_display_map.get(key, item["Checklist Item"])
                 matched_items[key] = item
 
     evaluations = list(matched_items.values())
@@ -180,7 +205,7 @@ def analyze_policy_section(section_id, checklist, policy_text):
         "Title": dpdpa_checklists[section_id]['title'],
         "Match Level": level,
         "Compliance Score": score,
-        "Checklist Items Matched": [item["Checklist Item"] for item in evaluations],
+        "Checklist Items Matched": [canonical_to_display.get(item["Checklist Item"], item["Checklist Item"]) for item in evaluations],
         "Matched Details": evaluations,
         "Suggested Rewrite": all_results[0].get("Suggested Rewrite", ""),
         "Simplified Legal Meaning": all_results[0].get("Simplified Legal Meaning", "")
@@ -205,3 +230,4 @@ if st.button("Run Compliance Check") and policy_text:
     checklist = dpdpa_checklists[section_id]['items']
     result = analyze_policy_section(section_id, checklist, policy_text)
     st.json(result)
+
