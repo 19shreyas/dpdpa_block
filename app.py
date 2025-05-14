@@ -81,6 +81,19 @@ def call_gpt(prompt):
     )
     return json.loads(response.choices[0].message.content)
 
+# --- Scoring Logic ---
+def compute_score_and_level(evaluations, total_items):
+    matched = [e for e in evaluations if e["Status"].lower() == "explicitly mentioned"]
+    partial = [e for e in evaluations if e["Status"].lower() == "partially mentioned"]
+    score = (len(matched) + 0.5 * len(partial)) / total_items if total_items else 0.0
+    if score >= 1.0:
+        level = "Fully Compliant"
+    elif score == 0:
+        level = "Non-Compliant"
+    else:
+        level = "Partially Compliant"
+    return round(score, 2), level
+
 # --- Analyzer ---
 def analyze_policy_section(section_id, checklist, policy_text):
     blocks = break_into_blocks(policy_text)
@@ -98,29 +111,20 @@ def analyze_policy_section(section_id, checklist, policy_text):
     matched_items = {}
     for res in all_results:
         for item in res.get("Checklist Evaluation", []):
-            # Normalize key for deduplication (strip, lowercase, remove final period)
-            clean_key = item["Checklist Item"].strip().lower().rstrip('.')
-            if clean_key not in matched_items:
-                matched_items[clean_key] = item
+            key = item["Checklist Item"].strip().lower().rstrip('.')
+            if key not in matched_items:
+                matched_items[key] = item
 
-    total_items = len(checklist)
-    matched_count = len(matched_items)
-    score = min(matched_count / total_items, 1.0) if total_items else 0.0
-
-    if matched_count == total_items:
-        match_level = "Fully Compliant"
-    elif matched_count == 0:
-        match_level = "Non-Compliant"
-    else:
-        match_level = "Partially Compliant"
+    evaluations = list(matched_items.values())
+    score, level = compute_score_and_level(evaluations, len(checklist))
 
     return {
         "Section": section_id,
         "Title": dpdpa_checklists[section_id]['title'],
-        "Match Level": match_level,
-        "Compliance Score": round(score, 2),
-        "Checklist Items Matched": [item["Checklist Item"] for item in matched_items.values()],
-        "Matched Details": list(matched_items.values()),
+        "Match Level": level,
+        "Compliance Score": score,
+        "Checklist Items Matched": [item["Checklist Item"] for item in evaluations],
+        "Matched Details": evaluations,
         "Suggested Rewrite": all_results[0].get("Suggested Rewrite", ""),
         "Simplified Legal Meaning": all_results[0].get("Simplified Legal Meaning", "")
     }
