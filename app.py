@@ -75,6 +75,8 @@ dpdpa_checklists = {
             "Publishes the business contact information of the DPO or person handling grievances."
         ]
     }
+    },
+    # Add similar checklist dicts for sections 5–8
 }
 
 # --- Block Splitter ---
@@ -163,12 +165,15 @@ def analyze_policy_section(section_id, checklist, policy_text):
             continue
 
     matched_items = {}
+    canonical_to_display = {
+        re.sub(r'[^a-z0-9 ]', '', item.lower()): item
+        for item in checklist
+    }
+
     for res in all_results:
         for item in res.get("Checklist Evaluation", []):
-            #key = item["Checklist Item"].strip().lower().rstrip('.')
             key = re.sub(r'[^a-z0-9 ]', '', item["Checklist Item"].strip().lower())
 
-            # Normalize synonyms only for Section 8
             if section_id == "8":
                 synonyms = {
                     "publishes business contact information of dpo": "publishes the business contact information of the dpo or person handling grievances",
@@ -180,17 +185,15 @@ def analyze_policy_section(section_id, checklist, policy_text):
                 }
                 for synonym, canonical in synonyms.items():
                     if synonym in key or key in synonym or synonym == key:
-                        key = canonical
+                        key = re.sub(r'[^a-z0-9 ]', '', canonical.lower())
                         break
 
-    
             if "all other checklist items" in key:
-                continue  # skip non-checklist filler
-    
-            if key not in matched_items:
-                item["Checklist Item"] = key  # Overwrite with normalized version
-                matched_items[key] = item
+                continue
 
+            if key not in matched_items:
+                item["Checklist Item"] = canonical_to_display.get(key, key)
+                matched_items[key] = item
 
     evaluations = list(matched_items.values())
     score, level = compute_score_and_level(evaluations, len(checklist))
@@ -200,7 +203,7 @@ def analyze_policy_section(section_id, checklist, policy_text):
         "Title": dpdpa_checklists[section_id]['title'],
         "Match Level": level,
         "Compliance Score": score,
-        "Checklist Items Matched": [item["Checklist Item"] for item in evaluations],
+        "Checklist Items Matched": [canonical_to_display.get(item["Checklist Item"], item["Checklist Item"]) for item in evaluations],
         "Matched Details": evaluations,
         "Suggested Rewrite": all_results[0].get("Suggested Rewrite", ""),
         "Simplified Legal Meaning": all_results[0].get("Simplified Legal Meaning", "")
@@ -225,3 +228,4 @@ if st.button("Run Compliance Check") and policy_text:
     checklist = dpdpa_checklists[section_id]['items']
     result = analyze_policy_section(section_id, checklist, policy_text)
     st.json(result)
+
