@@ -21,6 +21,18 @@ dpdpa_checklists = {
         ]
     },
     # Add similar checklist dicts for sections 5–8
+    "5": {
+        "title": "Notice",
+        "items": [
+            "Notice is provided in clear and plain language.",
+            "Notice is made available before or at the time of data collection.",
+            "Notice includes the purpose of processing personal data.",
+            "Notice specifies the rights of the Data Principal.",
+            "Notice includes details of the Data Fiduciary and means to contact them.",
+            "Notice discloses the manner in which the Data Principal can exercise their rights.",
+            "Notice is accessible in English or any language listed in the Eighth Schedule of the Constitution of India."
+        ]
+    }
 }
 
 # --- Block Splitter ---
