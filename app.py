@@ -48,19 +48,6 @@ dpdpa_checklists = {
             "If consent is withdrawn, data processing stops and data is erased unless legally required."
         ]
     },
-    "7": {
-        "title": "Certain Legitimate Uses",
-        "items": [
-            "Processing is necessary for performance of any function under the law or in the interest of the sovereignty and integrity of India.",
-            "Processing is necessary for compliance with any judgment, order, or decree of any court or tribunal in India.",
-            "Processing is necessary for responding to a medical emergency involving a threat to life or health.",
-            "Processing is necessary for taking measures to ensure safety during any disaster or breakdown of public order.",
-            "Processing is necessary for purposes related to employment or provision of service.",
-            "Processing is necessary for the purpose of public interest such as prevention of fraud, network and information security, or credit scoring.",
-            "Processing is for purposes of corporate governance, mergers, or disclosures under legal obligations.",
-            "Processing is necessary for any fair and reasonable purpose specified by the Data Protection Board."
-        ]
-    },
      "8": {
         "title": "General Obligations of Data Fiduciary",
         "items": [
@@ -74,9 +61,20 @@ dpdpa_checklists = {
             "Appoints a Data Protection Officer (DPO) if classified as a Significant Data Fiduciary.",
             "Publishes the business contact information of the DPO or person handling grievances."
         ]
-    }
     },
-    # Add similar checklist dicts for sections 5–8
+    "7": {
+        "title": "Certain Legitimate Uses",
+        "items": [
+            "Processing is necessary for performance of any function under the law or in the interest of the sovereignty and integrity of India.",
+            "Processing is necessary for compliance with any judgment, order, or decree of any court or tribunal in India.",
+            "Processing is necessary for responding to a medical emergency involving a threat to life or health.",
+            "Processing is necessary for taking measures to ensure safety during any disaster or breakdown of public order.",
+            "Processing is necessary for purposes related to employment or provision of service.",
+            "Processing is necessary for the purpose of public interest such as prevention of fraud, network and information security, or credit scoring.",
+            "Processing is for purposes of corporate governance, mergers, or disclosures under legal obligations.",
+            "Processing is necessary for any fair and reasonable purpose specified by the Data Protection Board."
+        ]
+    }
 }
 
 # --- Block Splitter ---
@@ -165,34 +163,13 @@ def analyze_policy_section(section_id, checklist, policy_text):
             continue
 
     matched_items = {}
-    canonical_to_display = {
-        re.sub(r'[^a-z0-9 ]', '', item.lower()): item
-        for item in checklist
-    }
-
     for res in all_results:
         for item in res.get("Checklist Evaluation", []):
-            key = re.sub(r'[^a-z0-9 ]', '', item["Checklist Item"].strip().lower())
-
-            if section_id == "8":
-                synonyms = {
-                    "publishes business contact information of dpo": "publishes the business contact information of the dpo or person handling grievances",
-                    "publishes dpo contact information": "publishes the business contact information of the dpo or person handling grievances",
-                    "appoints a data protection officer": "appoints a data protection officer (dpo) if classified as a significant data fiduciary",
-                    "conducts data protection impact assessments": "conducts periodic data protection impact assessments if required",
-                    "erases personal data when purpose is fulfilled": "erases personal data as soon as the purpose is fulfilled and retention is no longer necessary",
-                    "notifies data protection board and affected data principals in case of breach": "notifies the data protection board and affected data principals in the event of a breach"
-                }
-                for synonym, canonical in synonyms.items():
-                    if synonym in key or key in synonym or synonym == key:
-                        key = re.sub(r'[^a-z0-9 ]', '', canonical.lower())
-                        break
-
+            key = item["Checklist Item"].strip().lower().rstrip('.')
             if "all other checklist items" in key:
-                continue
+                continue  # skip irrelevant item
 
             if key not in matched_items:
-                item["Checklist Item"] = canonical_to_display.get(key, key)
                 matched_items[key] = item
 
     evaluations = list(matched_items.values())
@@ -203,7 +180,7 @@ def analyze_policy_section(section_id, checklist, policy_text):
         "Title": dpdpa_checklists[section_id]['title'],
         "Match Level": level,
         "Compliance Score": score,
-        "Checklist Items Matched": [canonical_to_display.get(item["Checklist Item"], item["Checklist Item"]) for item in evaluations],
+        "Checklist Items Matched": [item["Checklist Item"] for item in evaluations],
         "Matched Details": evaluations,
         "Suggested Rewrite": all_results[0].get("Suggested Rewrite", ""),
         "Simplified Legal Meaning": all_results[0].get("Simplified Legal Meaning", "")
@@ -228,4 +205,3 @@ if st.button("Run Compliance Check") and policy_text:
     checklist = dpdpa_checklists[section_id]['items']
     result = analyze_policy_section(section_id, checklist, policy_text)
     st.json(result)
-
