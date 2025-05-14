@@ -48,6 +48,19 @@ dpdpa_checklists = {
             "If consent is withdrawn, data processing stops and data is erased unless legally required."
         ]
     },
+    "7": {
+        "title": "Certain Legitimate Uses",
+        "items": [
+            "Processing is necessary for performance of any function under the law or in the interest of the sovereignty and integrity of India.",
+            "Processing is necessary for compliance with any judgment, order, or decree of any court or tribunal in India.",
+            "Processing is necessary for responding to a medical emergency involving a threat to life or health.",
+            "Processing is necessary for taking measures to ensure safety during any disaster or breakdown of public order.",
+            "Processing is necessary for purposes related to employment or provision of service.",
+            "Processing is necessary for the purpose of public interest such as prevention of fraud, network and information security, or credit scoring.",
+            "Processing is for purposes of corporate governance, mergers, or disclosures under legal obligations.",
+            "Processing is necessary for any fair and reasonable purpose specified by the Data Protection Board."
+        ]
+    },
      "8": {
         "title": "General Obligations of Data Fiduciary",
         "items": [
@@ -60,19 +73,6 @@ dpdpa_checklists = {
             "Conducts periodic Data Protection Impact Assessments if required.",
             "Appoints a Data Protection Officer (DPO) if classified as a Significant Data Fiduciary.",
             "Publishes the business contact information of the DPO or person handling grievances."
-        ]
-    },
-    "7": {
-        "title": "Certain Legitimate Uses",
-        "items": [
-            "Processing is necessary for performance of any function under the law or in the interest of the sovereignty and integrity of India.",
-            "Processing is necessary for compliance with any judgment, order, or decree of any court or tribunal in India.",
-            "Processing is necessary for responding to a medical emergency involving a threat to life or health.",
-            "Processing is necessary for taking measures to ensure safety during any disaster or breakdown of public order.",
-            "Processing is necessary for purposes related to employment or provision of service.",
-            "Processing is necessary for the purpose of public interest such as prevention of fraud, network and information security, or credit scoring.",
-            "Processing is for purposes of corporate governance, mergers, or disclosures under legal obligations.",
-            "Processing is necessary for any fair and reasonable purpose specified by the Data Protection Board."
         ]
     }
 }
