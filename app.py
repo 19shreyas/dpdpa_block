@@ -60,9 +60,21 @@ dpdpa_checklists = {
             "Processing is for purposes of corporate governance, mergers, or disclosures under legal obligations.",
             "Processing is necessary for any fair and reasonable purpose specified by the Data Protection Board."
         ]
+    },
+    "8": {
+        "title": "General Obligations of Data Fiduciary",
+        "items": [
+            "Implements appropriate technical and organizational measures to ensure compliance with DPDPA.",
+            "Maintains data accuracy and completeness to ensure it is up-to-date.",
+            "Implements reasonable security safeguards to prevent personal data breaches.",
+            "Notifies the Data Protection Board and affected Data Principals in the event of a breach.",
+            "Erases personal data as soon as the purpose is fulfilled and retention is no longer necessary.",
+            "Maintains records of processing activities in accordance with prescribed rules.",
+            "Conducts periodic Data Protection Impact Assessments if required.",
+            "Appoints a Data Protection Officer (DPO) if classified as a Significant Data Fiduciary.",
+            "Publishes the business contact information of the DPO or person handling grievances."
+        ]
     }
-
-
 }
 
 # --- Block Splitter ---
@@ -154,6 +166,9 @@ def analyze_policy_section(section_id, checklist, policy_text):
     for res in all_results:
         for item in res.get("Checklist Evaluation", []):
             key = item["Checklist Item"].strip().lower().rstrip('.')
+            if "all other checklist items" in key:
+                continue  # skip irrelevant item
+
             if key not in matched_items:
                 matched_items[key] = item
 
