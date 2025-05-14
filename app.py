@@ -165,23 +165,23 @@ def analyze_policy_section(section_id, checklist, policy_text):
     matched_items = {}
     for res in all_results:
         for item in res.get("Checklist Evaluation", []):
-        key = item["Checklist Item"].strip().lower().rstrip('.')
+            key = item["Checklist Item"].strip().lower().rstrip('.')
 
         # Normalize synonyms only for Section 8
-        if section_id == "8":
-            synonyms = {
-                "publishes business contact information of dpo": "publishes the business contact information of the dpo or person handling grievances",
-                "publishes dpo contact information": "publishes the business contact information of the dpo or person handling grievances",
-                "appoints a data protection officer": "appoints a data protection officer (dpo) if classified as a significant data fiduciary",
-                "conducts data protection impact assessments": "conducts periodic data protection impact assessments if required",
-                "erases personal data when purpose is fulfilled": "erases personal data as soon as the purpose is fulfilled and retention is no longer necessary"
-            }
-            if key in synonyms:
-                key = synonyms[key]
-        if "all other checklist items" in key:
-            continue  # skip non-checklist filler
-        if key not in matched_items:
-                matched_items[key] = item
+            if section_id == "8":
+                synonyms = {
+                    "publishes business contact information of dpo": "publishes the business contact information of the dpo or person handling grievances",
+                    "publishes dpo contact information": "publishes the business contact information of the dpo or person handling grievances",
+                    "appoints a data protection officer": "appoints a data protection officer (dpo) if classified as a significant data fiduciary",
+                    "conducts data protection impact assessments": "conducts periodic data protection impact assessments if required",
+                    "erases personal data when purpose is fulfilled": "erases personal data as soon as the purpose is fulfilled and retention is no longer necessary"
+                }
+                if key in synonyms:
+                    key = synonyms[key]
+            if "all other checklist items" in key:
+                continue  # skip non-checklist filler
+            if key not in matched_items:
+                    matched_items[key] = item
 
     evaluations = list(matched_items.values())
     score, level = compute_score_and_level(evaluations, len(checklist))
