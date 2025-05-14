@@ -178,7 +178,7 @@ def analyze_policy_section(section_id, checklist, policy_text):
                     "notifies data protection board and affected data principals in case of breach": "notifies the data protection board and affected data principals in the event of a breach"
                 }
                 for synonym, canonical in synonyms.items():
-                    if synonym in key:
+                    if synonym in key or key in synonym or synonym == key:
                         key = canonical
                         break
 
