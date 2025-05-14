@@ -74,9 +74,8 @@ dpdpa_checklists = {
             "Publishes the business contact information of the DPO or person handling grievances."
         ]
     }
-    },
+    }
     # Add similar checklist dicts for sections 5–8
-}
 
 # --- Block Splitter ---
 def break_into_blocks(text):
