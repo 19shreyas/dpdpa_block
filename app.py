@@ -223,10 +223,20 @@ elif upload_option == "Upload PDF":
     else:
         policy_text = ""
 
-section_id = st.selectbox("Choose DPDPA Section", options=list(dpdpa_checklists.keys()))
+section_options = list(dpdpa_checklists.keys()) + ["All Sections"]
+section_id = st.selectbox("Choose DPDPA Section", options=section_options)
+
 
 if st.button("Run Compliance Check") and policy_text:
-    checklist = dpdpa_checklists[section_id]['items']
-    result = analyze_policy_section(section_id, checklist, policy_text)
-    st.json(result)
+    if section_id == "All Sections":
+        for sid in dpdpa_checklists:
+            st.markdown(f"### Section {sid} — {dpdpa_checklists[sid]['title']}")
+            result = analyze_policy_section(sid, dpdpa_checklists[sid]['items'], policy_text)
+            st.json(result)
+            st.markdown("---")
+    else:
+        checklist = dpdpa_checklists[section_id]['items']
+        result = analyze_policy_section(section_id, checklist, policy_text)
+        st.json(result)
+
 
