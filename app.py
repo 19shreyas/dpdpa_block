@@ -4,6 +4,7 @@ import openai
 import json
 import pandas as pd
 import re
+import fitz  # PyMuPDF
 
 # --- OpenAI Setup ---
 api_key = st.secrets["OPENAI_API_KEY"]
@@ -41,6 +42,11 @@ def break_into_blocks(text):
         blocks.append(' '.join(current_block).strip())
     return blocks
 
+# --- PDF Extractor ---
+def extract_text_from_pdf(pdf_file):
+    doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
+    return "\n".join(page.get_text() for page in doc)
+
 # --- Prompt Generator ---
 def create_block_prompt(section_id, block_text, checklist):
     checklist_text = "\n".join(f"- {item}" for item in checklist)
@@ -52,7 +58,6 @@ You are a compliance analyst evaluating whether the following privacy policy blo
 
 **Policy Block:**
 {block_text}
-
 
 Evaluate each checklist item as: Explicitly Mentioned / Partially Mentioned / Missing.
 Return output in this format:
@@ -117,13 +122,22 @@ def analyze_policy_section(section_id, checklist, policy_text):
         "Simplified Legal Meaning": all_results[0].get("Simplified Legal Meaning", "")
     }
 
-# --- Streamlit UI (minimal for demo) ---
+# --- Streamlit UI ---
 st.title("DPDPA Compliance Checker")
 
-policy_text = st.text_area("Paste your Privacy Policy text:", height=300)
+upload_option = st.radio("Input method:", ["Paste text", "Upload PDF"])
+if upload_option == "Paste text":
+    policy_text = st.text_area("Paste your Privacy Policy text:", height=300)
+elif upload_option == "Upload PDF":
+    uploaded_pdf = st.file_uploader("Upload PDF file", type="pdf")
+    if uploaded_pdf:
+        policy_text = extract_text_from_pdf(uploaded_pdf)
+    else:
+        policy_text = ""
+
 section_id = st.selectbox("Choose DPDPA Section", options=list(dpdpa_checklists.keys()))
 
 if st.button("Run Compliance Check") and policy_text:
     checklist = dpdpa_checklists[section_id]['items']
     result = analyze_policy_section(section_id, checklist, policy_text)
-    st.json(result) # Display the structured GPT output
+    st.json(result)
