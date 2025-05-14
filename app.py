@@ -32,7 +32,7 @@ dpdpa_checklists = {
             "Notice discloses the manner in which the Data Principal can exercise their rights.",
             "Notice is accessible in English or any language listed in the Eighth Schedule of the Constitution of India."
         ]
-    }
+    },
     "6": {
         "title": "Consent",
         "items": [
