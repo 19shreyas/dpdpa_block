@@ -165,8 +165,9 @@ def analyze_policy_section(section_id, checklist, policy_text):
     matched_items = {}
     for res in all_results:
         for item in res.get("Checklist Evaluation", []):
-            key = item["Checklist Item"].strip().lower().rstrip('.')
-    
+            #key = item["Checklist Item"].strip().lower().rstrip('.')
+            key = re.sub(r'[^a-z0-9 ]', '', item["Checklist Item"].strip().lower())
+
             # Normalize synonyms only for Section 8
             if section_id == "8":
                 synonyms = {
