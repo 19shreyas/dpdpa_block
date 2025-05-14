@@ -204,7 +204,7 @@ def analyze_policy_section(section_id, checklist, policy_text):
         "Title": dpdpa_checklists[section_id]['title'],
         "Match Level": level,
         "Compliance Score": score,
-        "Checklist Items Matched": [canonical_to_display.get(item["Checklist Item"], item["Checklist Item"]) for item in evaluations],
+        "Checklist Items Matched": [item["Checklist Item"] for item in evaluations],
         "Matched Details": evaluations,
         "Suggested Rewrite": all_results[0].get("Suggested Rewrite", ""),
         "Simplified Legal Meaning": all_results[0].get("Simplified Legal Meaning", "")
