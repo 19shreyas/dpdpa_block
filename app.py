@@ -33,6 +33,22 @@ dpdpa_checklists = {
             "Notice is accessible in English or any language listed in the Eighth Schedule of the Constitution of India."
         ]
     }
+    "6": {
+        "title": "Consent",
+        "items": [
+            "Consent is free (voluntary, not coerced).",
+            "Consent is specific to a clearly defined purpose.",
+            "Consent is informed (based on full information provided beforehand).",
+            "Consent is unambiguous (clearly understood and intentional).",
+            "Consent is given via clear affirmative action.",
+            "Consent is limited to the specified purpose only.",
+            "Only personal data necessary for the purpose is processed.",
+            "Consent is provided before data processing begins.",
+            "Data Principal has the ability to withdraw consent easily and at any time.",
+            "If consent is withdrawn, data processing stops and data is erased unless legally required."
+        ]
+    }
+
 }
 
 # --- Block Splitter ---
