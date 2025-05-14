@@ -98,12 +98,15 @@ def analyze_policy_section(section_id, checklist, policy_text):
     matched_items = {}
     for res in all_results:
         for item in res.get("Checklist Evaluation", []):
-            if item["Checklist Item"] not in matched_items:
-                matched_items[item["Checklist Item"]] = item
+            # Normalize key for deduplication (strip, lowercase, remove final period)
+            clean_key = item["Checklist Item"].strip().lower().rstrip('.')
+            if clean_key not in matched_items:
+                matched_items[clean_key] = item
 
-    matched_count = len(matched_items)
     total_items = len(checklist)
-    score = matched_count / total_items if total_items else 0
+    matched_count = len(matched_items)
+    score = min(matched_count / total_items, 1.0) if total_items else 0.0
+
     if matched_count == total_items:
         match_level = "Fully Compliant"
     elif matched_count == 0:
@@ -115,8 +118,8 @@ def analyze_policy_section(section_id, checklist, policy_text):
         "Section": section_id,
         "Title": dpdpa_checklists[section_id]['title'],
         "Match Level": match_level,
-        "Compliance Score": score,
-        "Checklist Items Matched": list(matched_items.keys()),
+        "Compliance Score": round(score, 2),
+        "Checklist Items Matched": [item["Checklist Item"] for item in matched_items.values()],
         "Matched Details": list(matched_items.values()),
         "Suggested Rewrite": all_results[0].get("Suggested Rewrite", ""),
         "Simplified Legal Meaning": all_results[0].get("Simplified Legal Meaning", "")
