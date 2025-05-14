@@ -51,9 +51,8 @@ You are a compliance analyst evaluating whether the following privacy policy blo
 {checklist_text}
 
 **Policy Block:**
-"""
 {block_text}
-"""
+
 
 Evaluate each checklist item as: Explicitly Mentioned / Partially Mentioned / Missing.
 Return output in this format:
