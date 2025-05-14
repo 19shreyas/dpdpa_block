@@ -188,6 +188,7 @@ def analyze_policy_section(section_id, checklist, policy_text):
                 continue  # skip non-checklist filler
     
             if key not in matched_items:
+                item["Checklist Item"] = key  # Overwrite with normalized version
                 matched_items[key] = item
 
 
