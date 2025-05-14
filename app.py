@@ -177,8 +177,11 @@ def analyze_policy_section(section_id, checklist, policy_text):
                     "erases personal data when purpose is fulfilled": "erases personal data as soon as the purpose is fulfilled and retention is no longer necessary",
                     "notifies data protection board and affected data principals in case of breach": "notifies the data protection board and affected data principals in the event of a breach"
                 }
-                if key in synonyms:
-                    key = synonyms[key]
+                for synonym, canonical in synonyms.items():
+                    if synonym in key:
+                        key = canonical
+                        break
+
     
             if "all other checklist items" in key:
                 continue  # skip non-checklist filler
